@@ -10,9 +10,14 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.routers import ROUTERS
+from app.services.cohort_snapshot import snapshot_repo
+from app.services.metric_def import MetricDefService
 from app.store import store
 
 app = FastAPI(title="多维分析实验平台", version="1.0.0")
+
+# V020：把指标定义校验器注入同期群快照引擎，重算时自动逐周期校验留存分母
+snapshot_repo.set_validator(MetricDefService().validate_retention_matrix)
 
 app.add_middleware(
     CORSMiddleware,

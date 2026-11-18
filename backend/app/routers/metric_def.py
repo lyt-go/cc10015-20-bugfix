@@ -90,3 +90,21 @@ def run_action(entry_id: int, payload: ActionPayload) -> ActionResult:
     if entry is None:
         return ActionResult(ok=False, message=message)
     return ActionResult(ok=True, message=message, entry=entry)
+
+
+@router.get("/v020/keys")
+def v020_keys() -> dict[str, object]:
+    """V020：返回已注册、允许出现在留存矩阵中的指标键。"""
+    return {"items": service.v020_keys()}
+
+
+@router.get("/v020/validate")
+def v020_validate() -> dict[str, object]:
+    """V020 调用链：读取留存矩阵指标键，并逐周期校验每个群组的留存分母。"""
+    reports = service.validate_cohort_matrices()
+    return {
+        "items": reports,
+        "total": len(reports),
+        "passed": sum(1 for report in reports if report["ok"]),
+        "failed": sum(1 for report in reports if not report["ok"]),
+    }
